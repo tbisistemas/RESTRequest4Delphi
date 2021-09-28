@@ -47,6 +47,7 @@ type
     function ResourceSuffix(const AResourceSuffix: string): IRequest; overload;
     function ResourceSuffix: string; overload;
     function Token(const AToken: string): IRequest;
+    function TokenBearer(const AToken: string): IRequest;
     function BasicAuthentication(const AUsername, APassword: string): IRequest;
     function Get: IResponse;
     function Post: IResponse;
@@ -67,6 +68,7 @@ type
     function ContentType(const AContentType: string): IRequest;
     function UserAgent(const AName: string): IRequest;
     function AddCookies(const ACookies: TStrings): IRequest;
+    function AddCookie(const ACookieName, ACookieValue: string): IRequest;
     function AddParam(const AName, AValue: string): IRequest;
     function AddFile(const AName: string; const AValue: TStream): IRequest;
     function MakeURL(const AIncludeParams: Boolean = True): string;
@@ -117,6 +119,15 @@ begin
     ACookies.Free;
     LURI.Free;
   end;
+end;
+
+function TRequestIndy.AddCookie(const ACookieName, ACookieValue: string): IRequest;
+var
+  cookies: TStringList;
+begin
+  cookies := TStringList.Create;
+  cookies.AddPair(ACookieName, ACookieValue);
+  Result := AddCookies(cookies);
 end;
 
 function TRequestIndy.RaiseExceptionOn500: Boolean;
@@ -223,6 +234,12 @@ function TRequestIndy.Token(const AToken: string): IRequest;
 begin
   Result := Self;
   Self.AddHeader('Authorization', AToken);
+end;
+
+function TRequestIndy.TokenBearer(const AToken: string): IRequest;
+begin
+  Result := Self;
+  Self.AddHeader('Authorization', 'Bearer ' + AToken);
 end;
 
 function TRequestIndy.FullRequestURL(const AIncludeParams: Boolean): string;

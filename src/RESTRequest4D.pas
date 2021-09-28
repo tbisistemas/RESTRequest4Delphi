@@ -2,7 +2,11 @@ unit RESTRequest4D;
 
 interface
 
-uses RESTRequest4D.Request.Contract, RESTRequest4D.Response.Contract;
+uses
+{$IF NOT (DEFINED(RR4D_INDY) or DEFINED(FPC) or DEFINED(RR4D_NETHTTP))}
+  REST.Types,
+{$ENDIF}
+  RESTRequest4D.Request.Contract, RESTRequest4D.Response.Contract;
 
 type
   IRequest = RESTRequest4D.Request.Contract.IRequest;
@@ -12,6 +16,30 @@ type
   public
     class function New: IRequest;
   end;
+
+{$IF NOT (DEFINED(RR4D_INDY) or DEFINED(FPC) or DEFINED(RR4D_NETHTTP))}
+const
+  poDoNotEncode = REST.Types.poDoNotEncode;
+  poTransient = REST.Types.poTransient;
+  poAutoCreated = REST.Types.poAutoCreated;
+  {$IF COMPILERVERSION >= 33}
+  poFlatArray = REST.Types.poFlatArray;
+  poPHPArray = REST.Types.poPHPArray;
+  poListArray = REST.Types.poListArray;
+  {$ENDIF}
+
+  pkCOOKIE = REST.Types.pkCOOKIE;
+  pkGETorPOST = REST.Types.pkGETorPOST;
+  pkURLSEGMENT = REST.Types.pkURLSEGMENT;
+  pkHTTPHEADER = REST.Types.pkHTTPHEADER;
+  pkREQUESTBODY = REST.Types.pkREQUESTBODY;
+  {$IF COMPILERVERSION >= 32}
+  pkFILE = REST.Types.pkFILE;
+  {$ENDIF}
+  {$IF COMPILERVERSION >= 33}
+  pkQUERY = REST.Types.pkQUERY;
+  {$ENDIF}
+{$ENDIF}
 
 implementation
 

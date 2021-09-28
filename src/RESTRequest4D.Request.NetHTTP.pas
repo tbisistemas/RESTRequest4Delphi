@@ -38,6 +38,7 @@ type
     function ResourceSuffix(const AResourceSuffix: string): IRequest; overload;
     function ResourceSuffix: string; overload;
     function Token(const AToken: string): IRequest;
+    function TokenBearer(const AToken: string): IRequest;
     function BasicAuthentication(const AUsername, APassword: string): IRequest;
     function Get: IResponse;
     function Post: IResponse;
@@ -58,6 +59,7 @@ type
     function ContentType(const AContentType: string): IRequest;
     function UserAgent(const AName: string): IRequest;
     function AddCookies(const ACookies: TStrings): IRequest;
+    function AddCookie(const ACookieName, ACookieValue: string): IRequest;
     function AddParam(const AName, AValue: string): IRequest;
     function AddFile(const AName: string; const AValue: TStream): IRequest;
     function Asynchronous(const AValue: Boolean): IRequest;
@@ -77,6 +79,7 @@ implementation
 
 function TRequestNetHTTP.Accept(const AAccept: string): IRequest;
 begin
+  Result := Self;
   FNetHTTPClient.Accept := AAccept;
 end;
 
@@ -87,6 +90,7 @@ end;
 
 function TRequestNetHTTP.AcceptCharset(const AAcceptCharset: string): IRequest;
 begin
+  Result := Self;
   FNetHTTPClient.AcceptCharSet := AAcceptCharset;
 end;
 
@@ -97,6 +101,7 @@ end;
 
 function TRequestNetHTTP.AcceptEncoding(const AAcceptEncoding: string): IRequest;
 begin
+  Result := Self;
   FNetHTTPClient.AcceptEncoding := AAcceptEncoding;
 end;
 
@@ -173,6 +178,15 @@ begin
   end;
 end;
 
+function TRequestNetHTTP.AddCookie(const ACookieName, ACookieValue: string): IRequest;
+var
+  cookies: TStringList;
+begin
+  cookies := TStringList.Create;
+  cookies.AddPair(ACookieName, ACookieValue);
+  Result := AddCookies(cookies);
+end;
+
 function TRequestNetHTTP.AddFile(const AName: string; const AValue: TStream): IRequest;
 begin
   raise Exception.Create('Not implemented');
@@ -183,7 +197,7 @@ begin
   Result := Self;
   if AName.Trim.IsEmpty or AValue.Trim.IsEmpty then
     Exit;
-{$IFDEF VER340}
+{$IF COMPILERVERSION >= 34}
   FNetHTTPClient.CustHeaders.Add(AName, AValue);
 {$ELSE}
   {TODO -oAll -cCustoms Headers : Add headers with NetHTTPClient in versions below of 10.4 Sydney}
@@ -208,6 +222,7 @@ end;
 
 function TRequestNetHTTP.Asynchronous(const AValue: Boolean): IRequest;
 begin
+  Result := Self;
   FNetHTTPClient.Asynchronous := AValue;
 end;
 
@@ -235,13 +250,13 @@ begin
 end;
 
 function TRequestNetHTTP.ClearHeaders: IRequest;
-{$IFDEF VER340}
+{$IF COMPILERVERSION >= 34}
 var
   I: Integer;
 {$ENDIF}
 begin
   Result := Self;
-{$IFDEF VER340}
+{$IF COMPILERVERSION >= 34}
   for I := 0 to Pred(FNetHTTPClient.CustHeaders.Count) do
     FNetHTTPClient.CustHeaders.Delete(I);
 {$ELSE}
@@ -469,6 +484,12 @@ function TRequestNetHTTP.Token(const AToken: string): IRequest;
 begin
   Result := Self;
   Self.AddHeader('Authorization', AToken);
+end;
+
+function TRequestNetHTTP.TokenBearer(const AToken: string): IRequest;
+begin
+  Result := Self;
+  Self.AddHeader('Authorization', 'Bearer ' + AToken);
 end;
 
 function TRequestNetHTTP.UserAgent(const AName: string): IRequest;
